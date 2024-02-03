@@ -11,8 +11,10 @@ import com.yupi.project.model.dto.interfaceInfo.InterfaceInfoQueryRequest;
 import com.yupi.project.model.dto.interfaceInfo.InterfaceInfoUpdateRequest;
 import com.yupi.project.model.entity.InterfaceInfo;
 import com.yupi.project.model.entity.User;
+import com.yupi.project.model.enums.InterfaceInfoEnum;
 import com.yupi.project.service.InterfaceInfoService;
 import com.yupi.project.service.UserService;
+import com.yupi.yuapiclientsdk.client.YuApiClient;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -37,6 +39,9 @@ public class InterfaceInfoController {
 
     @Resource
     private UserService userService;
+
+    @Resource
+    private YuApiClient yuApiClient;
 
     // region 增删改查
 
@@ -208,22 +213,32 @@ public class InterfaceInfoController {
         if (idRequest == null || idRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        InterfaceInfo interfaceInfo = new InterfaceInfo();
-        BeanUtils.copyProperties(idRequest, interfaceInfo);
-        // 参数校验
-        interfaceInfoService.validInterfaceInfo(interfaceInfo, false);
-        User user = userService.getLoginUser(request);
-        long id = idRequest.getId();
-        // 判断是否存在
+        // 1.接口是否存在
+        Long id = idRequest.getId();
         InterfaceInfo oldInterfaceInfo = interfaceInfoService.getById(id);
         if (oldInterfaceInfo == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
         }
-        // 仅本人或管理员可修改
-        if (!oldInterfaceInfo.getUserId().equals(user.getId()) && !userService.isAdmin(request)) {
-            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+
+        // 2.接口是否可用
+        // 2.1 TODO 模拟用户信息
+        com.yupi.yuapiclientsdk.model.User user = new com.yupi.yuapiclientsdk.model.User();
+        user.setUsername("test");
+        // 2.2 通过签名验证用户信息是否正确
+        // TODO 这里使用 SDK 中写死的 url,后期需要改为映射
+        String usernameByPost = yuApiClient.getUsernameByPost(user);
+        if (StringUtils.isNotBlank(usernameByPost)) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "接口验证失败");
         }
+        // 2.3 构建接口信息
+        InterfaceInfo interfaceInfo = new InterfaceInfo();
+        interfaceInfo.setId(id);
+
+        // 3.接口改为可用
+        // 上线
+        interfaceInfo.setStatus(InterfaceInfoEnum.ONLINE.getValue());
         boolean result = interfaceInfoService.updateById(interfaceInfo);
+
         return ResultUtils.success(result);
     }
     /**
@@ -240,22 +255,22 @@ public class InterfaceInfoController {
         if (idRequest == null || idRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        InterfaceInfo interfaceInfo = new InterfaceInfo();
-        BeanUtils.copyProperties(idRequest, interfaceInfo);
-        // 参数校验
-        interfaceInfoService.validInterfaceInfo(interfaceInfo, false);
-        User user = userService.getLoginUser(request);
-        long id = idRequest.getId();
-        // 判断是否存在
+        // 1.接口是否存在
+        Long id = idRequest.getId();
         InterfaceInfo oldInterfaceInfo = interfaceInfoService.getById(id);
         if (oldInterfaceInfo == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
         }
-        // 仅本人或管理员可修改
-        if (!oldInterfaceInfo.getUserId().equals(user.getId()) && !userService.isAdmin(request)) {
-            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
-        }
+
+        // 构建接口信息
+        InterfaceInfo interfaceInfo = new InterfaceInfo();
+        interfaceInfo.setId(id);
+
+        // 3.接口改为不可用
+        // 下线
+        interfaceInfo.setStatus(InterfaceInfoEnum.OFFLINE.getValue());
         boolean result = interfaceInfoService.updateById(interfaceInfo);
+
         return ResultUtils.success(result);
     }
     // endregion
