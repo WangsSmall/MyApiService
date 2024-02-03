@@ -20,7 +20,7 @@ spring:
     host: localhost
     database: 0
 server:
-  port: 8081
+  port: 7529
   servlet:
     context-path: /api
 mybatis-plus:

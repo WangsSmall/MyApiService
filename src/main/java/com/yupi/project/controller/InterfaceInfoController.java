@@ -2,11 +2,13 @@ package com.yupi.project.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.google.gson.Gson;
 import com.yupi.project.annotation.AuthCheck;
 import com.yupi.project.common.*;
 import com.yupi.project.constant.CommonConstant;
 import com.yupi.project.exception.BusinessException;
 import com.yupi.project.model.dto.interfaceInfo.InterfaceInfoAddRequest;
+import com.yupi.project.model.dto.interfaceInfo.InterfaceInfoInvokeRequest;
 import com.yupi.project.model.dto.interfaceInfo.InterfaceInfoQueryRequest;
 import com.yupi.project.model.dto.interfaceInfo.InterfaceInfoUpdateRequest;
 import com.yupi.project.model.entity.InterfaceInfo;
@@ -273,6 +275,39 @@ public class InterfaceInfoController {
 
         return ResultUtils.success(result);
     }
+
+    @PostMapping("/invoke")
+    @AuthCheck(mustRole = "admin")
+    public BaseResponse<Object> invokeInterfaceInfo(@RequestBody InterfaceInfoInvokeRequest interfaceInfoInvokeRequest,
+                                                      HttpServletRequest request) {
+        if (interfaceInfoInvokeRequest == null || interfaceInfoInvokeRequest.getId() <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        // 1.获取用户id
+        Long id = interfaceInfoInvokeRequest.getId();
+        // 2.获取用户参数
+        String userRequestParams = interfaceInfoInvokeRequest.getUserRequestParams();
+        // 3.判断是否存在
+        InterfaceInfo oldInterfaceInfo = interfaceInfoService.getById(id);
+        // 4.检查接口状态是否为下载状态
+        if (oldInterfaceInfo == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "接口已关闭");
+        }
+        // 5.获取当前用户的签证
+        User loginUser = userService.getLoginUser(request);
+        String accessKey = loginUser.getAccessKey();
+        String secretKey = loginUser.getSecretKey();
+        // 创建一个YuApiClient,传入AK和SK
+        YuApiClient tempClient = new YuApiClient(accessKey, secretKey);
+        // 解析
+        Gson gson = new Gson();
+        com.yupi.yuapiclientsdk.model.User user = gson.fromJson(userRequestParams, com.yupi.yuapiclientsdk.model.User.class);
+        // 调用创建的Client获取用户名
+        String usernameByPost = tempClient.getUsernameByPost(user);
+
+        return ResultUtils.success(usernameByPost);
+    }
+
     // endregion
 
 }
