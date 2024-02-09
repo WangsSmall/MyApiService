@@ -31,3 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
+/yuapi-client-sdk/
+/yuapi-gateway/
+/yuapi-common/
+/yuapi-interface/
