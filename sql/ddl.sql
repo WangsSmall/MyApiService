@@ -64,7 +64,7 @@ create table if not exists `interface_info`
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 comment '接口信息';
 
 -- 用户调用接口关系表
-create table if not exists yuapi.`user_interface_info`
+create table if not exists `user_interface_info`
 (
     `id` bigint not null auto_increment comment '主键' primary key,
     `userId` bigint not null comment '调用用户 id',
