@@ -34,6 +34,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/interfaceInfo")
 @Slf4j
+@CrossOrigin
 public class InterfaceInfoController {
 
     @Resource
@@ -225,7 +226,8 @@ public class InterfaceInfoController {
         // 2.接口是否可用
         // 2.1 TODO 模拟用户信息
         com.yupi.yuapiclientsdk.model.User user = new com.yupi.yuapiclientsdk.model.User();
-        user.setUsername("test");
+        User loginUser = userService.getLoginUser(request);
+        user.setUsername(loginUser.getUserAccount());
         // 2.2 通过签名验证用户信息是否正确
         // TODO 这里使用 SDK 中写死的 url,后期需要改为映射
         String usernameByPost = yuApiClient.getUsernameByPost(user);

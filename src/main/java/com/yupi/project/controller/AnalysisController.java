@@ -12,6 +12,7 @@ import com.yupi.project.service.InterfaceInfoService;
 import com.yupi.yuapicommon.model.entity.InterfaceInfo;
 import com.yupi.yuapicommon.model.entity.UserInterfaceInfo;
 import org.springframework.beans.BeanUtils;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.annotation.Resource;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
  * @date 2024/2/9 20:37
  */
 @RequestMapping("analysis")
+@CrossOrigin
 public class AnalysisController {
     @Resource
     private UserInterfaceInfoMapper userInterfaceInfoMapper;
