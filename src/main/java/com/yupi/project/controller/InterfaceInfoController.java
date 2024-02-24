@@ -216,34 +216,26 @@ public class InterfaceInfoController {
         if (idRequest == null || idRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        // 1.接口是否存在
-        Long id = idRequest.getId();
+        long id = idRequest.getId();
+        // 判断是否存在
         InterfaceInfo oldInterfaceInfo = interfaceInfoService.getById(id);
         if (oldInterfaceInfo == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
         }
-
-        // 2.接口是否可用
-        // 2.1 TODO 模拟用户信息
+        // 判断该接口是否可以调用
         com.yupi.yuapiclientsdk.model.User user = new com.yupi.yuapiclientsdk.model.User();
-        User loginUser = userService.getLoginUser(request);
-        user.setUsername(loginUser.getUserAccount());
-        // 2.2 通过签名验证用户信息是否正确
-        // TODO 这里使用 SDK 中写死的 url,后期需要改为映射
-        String usernameByPost = yuApiClient.getUsernameByPost(user);
-        if (StringUtils.isNotBlank(usernameByPost)) {
+        user.setUsername("test");
+        String username = yuApiClient.getUsernameByPost(user);
+        if (StringUtils.isBlank(username)) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "接口验证失败");
         }
-        // 2.3 构建接口信息
+        // 仅本人或管理员可修改
         InterfaceInfo interfaceInfo = new InterfaceInfo();
         interfaceInfo.setId(id);
-
-        // 3.接口改为可用
-        // 上线
         interfaceInfo.setStatus(InterfaceInfoEnum.ONLINE.getValue());
         boolean result = interfaceInfoService.updateById(interfaceInfo);
-
         return ResultUtils.success(result);
+
     }
     /**
      * 接口下线
@@ -293,6 +285,9 @@ public class InterfaceInfoController {
         InterfaceInfo oldInterfaceInfo = interfaceInfoService.getById(id);
         // 4.检查接口状态是否为下载状态
         if (oldInterfaceInfo == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+        }
+        if (oldInterfaceInfo.getStatus() == InterfaceInfoEnum.OFFLINE.getValue()) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "接口已关闭");
         }
         // 5.获取当前用户的签证
