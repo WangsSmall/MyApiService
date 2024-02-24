@@ -11,7 +11,7 @@
     </parent>
     <groupId>com.yupi</groupId>
     <artifactId>yuapi-backend</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.3</version>
     <name>yuapi-backend</name>
     <description>鱼皮接口</description>
     <properties>
