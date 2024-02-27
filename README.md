@@ -1,5 +1,6 @@
 # 云 API 托管服务
 
+需要启动 backend 下的服务和 interface 模拟接口服务
 
 ## 使用技术点
 
