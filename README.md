@@ -1,6 +1,7 @@
 # 云 API 托管服务
 
 需要启动 backend 下的服务和 interface 模拟接口服务
+SDK 服务、GateWay 服务、Common 服务已打成 Jar 包引入
 
 ## 使用技术点
 
