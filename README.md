@@ -5,7 +5,7 @@ SDK 服务、GateWay 服务、Common 服务已打成 Jar 包引入
 
 ## 使用技术点
 
-- Spring Boot 2.7.0（贼新）
+- Spring Boot 2.7.0
 - MySQL 驱动
 - MyBatis
 - MyBatis Plus
