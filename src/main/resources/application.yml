@@ -50,5 +50,5 @@ dubbo:
 # InterfaceInfo SDK 签名验证
 yuapi:
   client:
-    access-key: yupi
-    secret-key: abcdefgh
+    access-key: wang
+    secret-key: wang123
